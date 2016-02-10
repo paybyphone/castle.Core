@@ -1,3 +1,7 @@
+# Why do we need this fork?
+
+Castle.Core-log4net has a dependency on the exact version of log4net - 1.2.10. This makes it hard to use Castle.Logging with our projects which reference more recent version of log4net (>2.0). In this fork we will update Castle.Core references to use the most recent version of log4net. The package will be published only with NET45 support.
+
 # Castle Core
 
 <img align="right" src="docs/images/castle-logo.png">
