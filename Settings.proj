@@ -31,7 +31,7 @@ limitations under the License.
 
 	<!-- Project Properties -->
 	<PropertyGroup>
-		<ProjectName>Castle.Services.Logging.log4netIntegration</ProjectName>
+		<ProjectName>Castle.Core</ProjectName>
 		<SilverlightBuild>false</SilverlightBuild>
 		<SilverlightBuild Condition="'$(BuildConfigKey)'== 'SL40' Or '$(BuildConfigKey)'== 'SL50'">true</SilverlightBuild>
 		
