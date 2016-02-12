@@ -29,6 +29,7 @@ limitations under the License.
 	</PropertyGroup>
 
 	<!-- Import common targets -->
+	<Message Text="$(BuildScriptsPath)/Castle.Common.Targets" Importance="high"/>
 	<Import Project="$(RootPath)/Settings.proj" />
 	<Import Project="$(BuildScriptsPath)/Castle.Common.Targets" />
 	<Import Project="$(MSBuildBinPath)/Microsoft.CSharp.Targets" Condition="($(MSBuildTargets) == '') Or ($(MSBuildTargets) == 'CSharp')" />
