@@ -29,13 +29,14 @@ limitations under the License.
 	</PropertyGroup>
 
 	<!-- Import common targets -->
-	<Message Text="$(BuildScriptsPath)/Castle.Common.Targets" Importance="high"/>
+	
 	<Import Project="$(RootPath)/Settings.proj" />
 	<Import Project="$(BuildScriptsPath)/Castle.Common.Targets" />
 	<Import Project="$(MSBuildBinPath)/Microsoft.CSharp.Targets" Condition="($(MSBuildTargets) == '') Or ($(MSBuildTargets) == 'CSharp')" />
 
 
 	<Target Name="CheckRequiredProperties">
+		<Message Text="$(BuildScriptsPath)/Castle.Common.Targets" Importance="high"/>
 		<Error Condition="'$(ProjectName)' == ''" Text="The ProjectName property has not been set, please set it in Settings.proj." />
 		<Error Text="The tools version &quot;$(MSBuildToolsVersion)&quot; is not supported, MSBuild 4.0 or newer is required to build." Condition="'$(MSBuildToolsVersion)' != '4.0'" />
 
