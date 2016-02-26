@@ -19,7 +19,7 @@ namespace Castle.DynamicProxy.Generators
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Reflection;
-#if !SILVERLIGHT
+#if FEATURE_SERIALIZATION
 	using System.Runtime.Serialization;
 	using System.Xml.Serialization;
 #endif
@@ -88,7 +88,7 @@ namespace Castle.DynamicProxy.Generators
 		{
 			Debug.Assert(implementer != null, "implementer != null");
 			Debug.Assert(@interface != null, "@interface != null");
-			Debug.Assert(@interface.IsInterface, "@interface.IsInterface");
+			Debug.Assert(@interface.GetTypeInfo().IsInterface, "@interface.IsInterface");
 
 			if (!mapping.ContainsKey(@interface))
 			{
@@ -96,13 +96,13 @@ namespace Castle.DynamicProxy.Generators
 			}
 		}
 
+#if FEATURE_SERIALIZATION
 		protected void AddMappingForISerializable(IDictionary<Type, ITypeContributor> typeImplementerMapping,
 		                                          ITypeContributor instance)
 		{
-#if !SILVERLIGHT
 			AddMapping(typeof(ISerializable), instance, typeImplementerMapping);
-#endif
 		}
+#endif
 
 		/// <summary>
 		///   It is safe to add mapping (no mapping for the interface exists)
@@ -131,7 +131,7 @@ namespace Castle.DynamicProxy.Generators
 
 		protected void CheckNotGenericTypeDefinition(Type type, string argumentName)
 		{
-			if (type != null && type.IsGenericTypeDefinition)
+			if (type != null && type.GetTypeInfo().IsGenericTypeDefinition)
 			{
 				throw new ArgumentException("Type cannot be a generic type definition. Type: " + type.FullName, argumentName);
 			}
@@ -165,7 +165,7 @@ namespace Castle.DynamicProxy.Generators
 		{
 			var interceptorsField = emitter.CreateField("__interceptors", typeof(IInterceptor[]));
 
-#if !SILVERLIGHT
+#if FEATURE_SERIALIZATION
 			emitter.DefineCustomAttributeFor<XmlIgnoreAttribute>(interceptorsField);
 #endif
 		}
@@ -188,7 +188,7 @@ namespace Castle.DynamicProxy.Generators
 		protected virtual void CreateTypeAttributes(ClassEmitter emitter)
 		{
 			emitter.AddCustomAttributes(ProxyGenerationOptions);
-#if !SILVERLIGHT
+#if FEATURE_SERIALIZATION
 			emitter.DefineCustomAttribute<XmlIncludeAttribute>(new object[] { targetType });
 #endif
 		}
@@ -245,7 +245,7 @@ namespace Castle.DynamicProxy.Generators
 			if (baseConstructorParams != null && baseConstructorParams.Length != 0)
 			{
 				var last = baseConstructorParams.Last();
-				if (last.ParameterType.IsArray && last.HasAttribute<ParamArrayAttribute>())
+				if (last.ParameterType.GetTypeInfo().IsArray && last.HasAttribute<ParamArrayAttribute>())
 				{
 					var parameter = constructor.ConstructorBuilder.DefineParameter(args.Length, ParameterAttributes.None, last.Name);
 					var builder = AttributeUtil.CreateBuilder<ParamArrayAttribute>();
@@ -397,7 +397,7 @@ namespace Castle.DynamicProxy.Generators
 					return cacheType;
 				}
 			}
-			
+
 			// This is to avoid generating duplicate types under heavy multithreaded load.
 			using (var locker = Scope.Lock.ForReadingUpgradeable())
 			{
@@ -430,7 +430,7 @@ namespace Castle.DynamicProxy.Generators
 			return constructor.IsPublic
 			       || constructor.IsFamily
 			       || constructor.IsFamilyOrAssembly
-#if !Silverlight
+#if !SILVERLIGHT
 			       || (constructor.IsAssembly && InternalsUtil.IsInternalToDynamicProxy(constructor.DeclaringType.Assembly));
 #else
             ;

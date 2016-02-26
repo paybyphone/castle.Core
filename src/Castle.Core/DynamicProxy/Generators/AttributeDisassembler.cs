@@ -22,7 +22,9 @@ namespace Castle.DynamicProxy.Generators
 
 	using Castle.DynamicProxy.Internal;
 
+#if FEATURE_SERIALIZATION
 	[Serializable]
+#endif
 	public class AttributeDisassembler : IAttributeDisassembler
 	{
 		public CustomAttributeBuilder Disassemble(Attribute attribute)
@@ -135,7 +137,6 @@ namespace Castle.DynamicProxy.Generators
 		/// </summary>
 		private static object[] InitializeConstructorArgs(Type attributeType, Attribute attribute, ParameterInfo[] parameters)
 		{
-
 			var args = new object[parameters.Length];
 			for (var i = 0; i < args.Length; i++)
 			{
@@ -223,7 +224,7 @@ namespace Castle.DynamicProxy.Generators
 			{
 				return false;
 			}
-			if (type.IsEnum)
+			if (type.GetTypeInfo().IsEnum)
 			{
 				return Enum.ToObject(type, 0);
 			}
@@ -231,11 +232,11 @@ namespace Castle.DynamicProxy.Generators
 			{
 				return Char.MinValue;
 			}
-			if (type.IsPrimitive)
+			if (type.GetTypeInfo().IsPrimitive)
 			{
 				return 0;
 			}
-			if(type.IsArray && parameter.IsDefined(typeof(ParamArrayAttribute), true))
+			if(type.GetTypeInfo().IsArray && parameter.IsDefined(typeof(ParamArrayAttribute), true))
 			{
 				return Array.CreateInstance(type.GetElementType(), 0);
 			}

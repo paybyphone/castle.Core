@@ -104,8 +104,6 @@ namespace Castle.DynamicProxy.Tests
 			proxy.Foo<int>();
 		}
 
-#if !MONO
-
 		[Test]
 		public void ProxyWithGenericArgumentAndGenericMethod()
 		{
@@ -396,11 +394,13 @@ namespace Castle.DynamicProxy.Tests
 		}
 
 		[Test]
-		[ExpectedException(typeof(GeneratorException))]
 		public void ThrowsWhenProxyingGenericTypeDefNoTarget()
 		{
 			var interceptor = new KeepDataInterceptor();
-			var o = generator.CreateInterfaceProxyWithoutTarget(typeof(IGenInterfaceHierarchyBase<>), interceptor);
+
+			Assert.Throws<GeneratorException>(() =>
+				generator.CreateInterfaceProxyWithoutTarget(typeof(IGenInterfaceHierarchyBase<>), interceptor)
+			);
 		}
 
 		[Test(Description = "There is a strange CLR bug resulting from our loading the tokens of methods in generic types. "
@@ -446,7 +446,6 @@ namespace Castle.DynamicProxy.Tests
 				AppDomain.Unload(newDomain);
 			}
 		}
-#endif
 #endif
 	}
 }

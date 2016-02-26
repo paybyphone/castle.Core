@@ -12,18 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if !SILVERLIGHT && !MONO
+#if !SILVERLIGHT
 namespace CastleTests.Core.Tests.Internal
 {
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
-	using System.Linq;
-	using NUnit.Framework;
+
 	using Castle.Core.Internal;
+
+	using NUnit.Framework;
 
 	[TestFixture]
 	public class WeakKeyDictionaryTestCase
+#if FEATURE_XUNITNET
+		: IDisposable
+#endif
 	{
 		private WeakKeyDictionary<TKey, TValue> Dictionary;
 		private KeyValuePair<TKey, TValue> Item;
@@ -39,11 +43,14 @@ namespace CastleTests.Core.Tests.Internal
 			GC.Collect();
 			Dictionary.TrimDeadObjects();
 
-			Assert.That(Dictionary.Count,      Is.EqualTo(1));
-			Assert.That(Dictionary[Item.Key],  Is.SameAs(Item.Value));
+			Assert.AreEqual(1, Dictionary.Count);
+			Assert.AreSame(Item.Value, Dictionary[Item.Key]);
 		}
 
 		[Test]
+#if __MonoCS__
+		[Ignore("Expected: 0  But was: 1")]
+#endif
 		public void AfterExplicitTrim_DeadObject()
 		{
 			CreateDictionary(); AddItem(); ResetItem();
@@ -51,7 +58,7 @@ namespace CastleTests.Core.Tests.Internal
 			GC.Collect();
 			Dictionary.TrimDeadObjects();
 
-			Assert.That(Dictionary.Count, Is.EqualTo(0));
+			Assert.AreEqual(0, Dictionary.Count);
 		}
 
 		[Test]
@@ -62,8 +69,8 @@ namespace CastleTests.Core.Tests.Internal
 			GC.Collect();
 			TriggerAutomaticTrim();
 
-			Assert.That(Dictionary.Count,      Is.EqualTo(1));
-			Assert.That(Dictionary[Item.Key],  Is.SameAs(Item.Value));
+			Assert.AreEqual(1, Dictionary.Count);
+			Assert.AreSame(Item.Value, Dictionary[Item.Key]);
 		}
 
 		[Test]
@@ -74,7 +81,7 @@ namespace CastleTests.Core.Tests.Internal
 			GC.Collect();
 			TriggerAutomaticTrim();
 
-			Assert.That(Dictionary.Count, Is.EqualTo(0));
+			Assert.AreEqual(0, Dictionary.Count);
 		}
 
 		[Test]
@@ -82,7 +89,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary();
 
-			Assert.That(Dictionary.Count, Is.EqualTo(0));
+			Assert.AreEqual(0, Dictionary.Count);
 		}
 
 		[Test]
@@ -90,7 +97,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary();
 
-			Assert.That(Dictionary.Keys.Count, Is.EqualTo(0));
+			Assert.AreEqual(0, Dictionary.Keys.Count);
 		}
 
 		[Test]
@@ -98,7 +105,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary();
 
-			Assert.That(Dictionary.Values.Count, Is.EqualTo(0));
+			Assert.AreEqual(0, Dictionary.Values.Count);
 		}
 
 		[Test]
@@ -106,7 +113,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary();
 
-			Assert.That(Dictionary.ContainsKey(OtherItem.Key), Is.False);
+			Assert.False(Dictionary.ContainsKey(OtherItem.Key));
 		}
 
 		[Test]
@@ -114,7 +121,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary();
 
-			Assert.That(Collection.Contains(OtherItem), Is.False);
+			Assert.False(Collection.Contains(OtherItem));
 		}
 
 		[Test]
@@ -122,7 +129,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary();
 
-			Assert.That(Dictionary.Keys.Contains(OtherItem.Key), Is.False);
+			Assert.False(Dictionary.Keys.Contains(OtherItem.Key));
 		}
 
 		[Test]
@@ -130,7 +137,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary();
 
-			Assert.That(Dictionary.Values.Contains(OtherItem.Value), Is.False);
+			Assert.False(Dictionary.Values.Contains(OtherItem.Value));
 		}
 
 		[Test]
@@ -150,8 +157,8 @@ namespace CastleTests.Core.Tests.Internal
 			TValue value;
 			var result = Dictionary.TryGetValue(OtherItem.Key, out value);
 
-			Assert.That(result, Is.False);
-			Assert.That(value,  Is.EqualTo(default(TValue)));
+			Assert.False(result);
+			Assert.AreEqual(default(TValue), value);
 		}
 
 		[Test]
@@ -161,8 +168,8 @@ namespace CastleTests.Core.Tests.Internal
 
 			using (var e = Dictionary.GetEnumerator())
 			{
-				Assert.That(e,            Is.Not.Null);
-				Assert.That(e.MoveNext(), Is.False);
+				Assert.IsNotNull(e);
+				Assert.False(e.MoveNext());
 			}
 		}
 
@@ -173,8 +180,8 @@ namespace CastleTests.Core.Tests.Internal
 
 			using (var e = Dictionary.Keys.GetEnumerator())
 			{
-				Assert.That(e,            Is.Not.Null);
-				Assert.That(e.MoveNext(), Is.False);
+				Assert.IsNotNull(e);
+				Assert.False(e.MoveNext());
 			}
 		}
 
@@ -185,8 +192,8 @@ namespace CastleTests.Core.Tests.Internal
 
 			using (var e = Dictionary.Values.GetEnumerator())
 			{
-				Assert.That(e,            Is.Not.Null);
-				Assert.That(e.MoveNext(), Is.False);
+				Assert.IsNotNull(e);
+				Assert.False(e.MoveNext());
 			}
 		}
 
@@ -196,8 +203,8 @@ namespace CastleTests.Core.Tests.Internal
 			CreateDictionary();
 
 			var e = AsEnumerable(Dictionary).GetEnumerator();
-			Assert.That(e,            Is.Not.Null);
-			Assert.That(e.MoveNext(), Is.False);
+			Assert.IsNotNull(e);
+			Assert.False(e.MoveNext());
 		}
 
 		[Test]
@@ -206,8 +213,8 @@ namespace CastleTests.Core.Tests.Internal
 			CreateDictionary();
 
 			var e = AsEnumerable(Dictionary.Keys).GetEnumerator();
-			Assert.That(e,            Is.Not.Null);
-			Assert.That(e.MoveNext(), Is.False);
+			Assert.IsNotNull(e);
+			Assert.False(e.MoveNext());
 		}
 
 		[Test]
@@ -216,8 +223,8 @@ namespace CastleTests.Core.Tests.Internal
 			CreateDictionary();
 
 			var e = AsEnumerable(Dictionary.Values).GetEnumerator();
-			Assert.That(e,            Is.Not.Null);
-			Assert.That(e.MoveNext(), Is.False);
+			Assert.IsNotNull(e);
+			Assert.False(e.MoveNext());
 		}
 
 		[Test]
@@ -229,7 +236,7 @@ namespace CastleTests.Core.Tests.Internal
 
 			Dictionary.CopyTo(modified, 1);
 
-			Assert.That(modified, Is.EquivalentTo(original));
+			CollectionAssert.AreEquivalent(original, modified);
 		}
 
 		[Test]
@@ -241,7 +248,7 @@ namespace CastleTests.Core.Tests.Internal
 
 			Dictionary.Keys.CopyTo(modified, 1);
 
-			Assert.That(modified, Is.EquivalentTo(original));
+			CollectionAssert.AreEquivalent(original, modified);
 		}
 
 		[Test]
@@ -253,7 +260,7 @@ namespace CastleTests.Core.Tests.Internal
 
 			Dictionary.Values.CopyTo(modified, 1);
 
-			Assert.That(modified, Is.EquivalentTo(original));
+			CollectionAssert.AreEquivalent(original, modified);
 		}
 
 		[Test]
@@ -261,7 +268,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem();
 
-			Assert.That(Dictionary.Count, Is.EqualTo(1));
+			Assert.AreEqual(1, Dictionary.Count);
 		}
 
 		[Test]
@@ -269,7 +276,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem();
 
-			Assert.That(Dictionary.Keys.Count, Is.EqualTo(1));
+			Assert.AreEqual(1, Dictionary.Keys.Count);
 		}
 
 		[Test]
@@ -277,7 +284,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem();
 
-			Assert.That(Dictionary.Values.Count, Is.EqualTo(1));
+			Assert.AreEqual(1, Dictionary.Values.Count);
 		}
 
 		[Test]
@@ -285,7 +292,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem();
 
-			Assert.That(Dictionary.ContainsKey(Item.Key), Is.True);
+			Assert.True(Dictionary.ContainsKey(Item.Key));
 		}
 
 		[Test]
@@ -293,7 +300,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem();
 
-			Assert.That(Collection.Contains(Item), Is.True);
+			Assert.True(Collection.Contains(Item));
 		}
 
 		[Test]
@@ -301,7 +308,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem();
 
-			Assert.That(Dictionary.Keys.Contains(Item.Key), Is.True);
+			Assert.True(Dictionary.Keys.Contains(Item.Key));
 		}
 
 		[Test]
@@ -309,7 +316,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem();
 
-			Assert.That(Dictionary.Values.Contains(Item.Value), Is.True);
+			Assert.True(Dictionary.Values.Contains(Item.Value));
 		}
 
 		[Test]
@@ -317,7 +324,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem();
 
-			Assert.That(Dictionary[Item.Key], Is.EqualTo(Item.Value));
+			Assert.AreEqual(Item.Value, Dictionary[Item.Key]);
 		}
 
 		[Test]
@@ -328,8 +335,8 @@ namespace CastleTests.Core.Tests.Internal
 			TValue value;
 			var result = Dictionary.TryGetValue(Item.Key, out value);
 
-			Assert.That(result, Is.True);
-			Assert.That(value,  Is.EqualTo(Item.Value));
+			Assert.True(result);
+			Assert.AreEqual(Item.Value, value);
 		}
 
 		[Test]
@@ -339,10 +346,10 @@ namespace CastleTests.Core.Tests.Internal
 
 			using (var e = Dictionary.GetEnumerator())
 			{
-				Assert.That(e,            Is.Not.Null);
-				Assert.That(e.MoveNext(), Is.True);
-				Assert.That(e.Current,    Is.EqualTo(Item));
-				Assert.That(e.MoveNext(), Is.False);
+				Assert.IsNotNull(e);
+				Assert.True(e.MoveNext());
+				Assert.AreEqual(Item, e.Current);
+				Assert.False(e.MoveNext());
 			}
 		}
 
@@ -353,10 +360,10 @@ namespace CastleTests.Core.Tests.Internal
 
 			using (var e = Dictionary.Keys.GetEnumerator())
 			{
-				Assert.That(e,            Is.Not.Null);
-				Assert.That(e.MoveNext(), Is.True);
-				Assert.That(e.Current,    Is.EqualTo(Item.Key));
-				Assert.That(e.MoveNext(), Is.False);
+				Assert.IsNotNull(e);
+				Assert.True(e.MoveNext());
+				Assert.AreEqual(Item.Key, e.Current);
+				Assert.False(e.MoveNext());
 			}
 		}
 
@@ -367,10 +374,10 @@ namespace CastleTests.Core.Tests.Internal
 
 			using (var e = Dictionary.Values.GetEnumerator())
 			{
-				Assert.That(e,            Is.Not.Null);
-				Assert.That(e.MoveNext(), Is.True);
-				Assert.That(e.Current,    Is.EqualTo(Item.Value));
-				Assert.That(e.MoveNext(), Is.False);
+				Assert.IsNotNull(e);
+				Assert.True(e.MoveNext());
+				Assert.AreEqual(Item.Value, e.Current);
+				Assert.False(e.MoveNext());
 			}
 		}
 
@@ -380,10 +387,10 @@ namespace CastleTests.Core.Tests.Internal
 			CreateDictionary(); AddItem();
 
 			var e = AsEnumerable(Dictionary).GetEnumerator();
-			Assert.That(e,            Is.Not.Null);
-			Assert.That(e.MoveNext(), Is.True);
-			Assert.That(e.Current,    Is.EqualTo(Item));
-			Assert.That(e.MoveNext(), Is.False);
+			Assert.IsNotNull(e);
+			Assert.True(e.MoveNext());
+			Assert.AreEqual(Item, e.Current);
+			Assert.False(e.MoveNext());
 		}
 
 		[Test]
@@ -392,10 +399,10 @@ namespace CastleTests.Core.Tests.Internal
 			CreateDictionary(); AddItem();
 
 			var e = AsEnumerable(Dictionary.Keys).GetEnumerator();
-			Assert.That(e,            Is.Not.Null);
-			Assert.That(e.MoveNext(), Is.True);
-			Assert.That(e.Current,    Is.EqualTo(Item.Key));
-			Assert.That(e.MoveNext(), Is.False);
+			Assert.IsNotNull(e);
+			Assert.True(e.MoveNext());
+			Assert.AreEqual(Item.Key, e.Current);
+			Assert.False(e.MoveNext());
 		}
 
 		[Test]
@@ -404,10 +411,10 @@ namespace CastleTests.Core.Tests.Internal
 			CreateDictionary(); AddItem();
 
 			var e = AsEnumerable(Dictionary.Values).GetEnumerator();
-			Assert.That(e,            Is.Not.Null);
-			Assert.That(e.MoveNext(), Is.True);
-			Assert.That(e.Current,    Is.EqualTo(Item.Value));
-			Assert.That(e.MoveNext(), Is.False);
+			Assert.IsNotNull(e);
+			Assert.True(e.MoveNext());
+			Assert.AreEqual(Item.Value, e.Current);
+			Assert.False(e.MoveNext());
 		}
 
 		[Test]
@@ -419,9 +426,9 @@ namespace CastleTests.Core.Tests.Internal
 
 			Dictionary.CopyTo(modified, 1);
 
-			Assert.That(modified[0], Is.EqualTo(original[0]));
-			Assert.That(modified[1], Is.EqualTo(Item));
-			Assert.That(modified[2], Is.EqualTo(original[2]));
+			Assert.AreEqual(original[0], modified[0]);
+			Assert.AreEqual(Item, modified[1]);
+			Assert.AreEqual(original[2], modified[2]);
 		}
 
 		[Test]
@@ -433,9 +440,9 @@ namespace CastleTests.Core.Tests.Internal
 
 			Dictionary.Keys.CopyTo(modified, 1);
 
-			Assert.That(modified[0], Is.EqualTo(original[0]));
-			Assert.That(modified[1], Is.EqualTo(Item.Key));
-			Assert.That(modified[2], Is.EqualTo(original[2]));
+			Assert.AreEqual(original[0], modified[0]);
+			Assert.AreEqual(Item.Key, modified[1]);
+			Assert.AreEqual(original[2], modified[2]);
 		}
 
 		[Test]
@@ -447,9 +454,9 @@ namespace CastleTests.Core.Tests.Internal
 
 			Dictionary.Values.CopyTo(modified, 1);
 
-			Assert.That(modified[0], Is.EqualTo(original[0]));
-			Assert.That(modified[1], Is.EqualTo(Item.Value));
-			Assert.That(modified[2], Is.EqualTo(original[2]));
+			Assert.AreEqual(original[0], modified[0]);
+			Assert.AreEqual(Item.Value, modified[1]);
+			Assert.AreEqual(original[2], modified[2]);
 		}
 
 		[Test]
@@ -457,7 +464,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem(); RemoveItem();
 
-			Assert.That(Dictionary.Count, Is.EqualTo(0));
+			Assert.AreEqual(0, Dictionary.Count);
 		}
 
 		[Test]
@@ -465,7 +472,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem(); RemoveItem();
 
-			Assert.That(Dictionary.Keys.Count, Is.EqualTo(0));
+			Assert.AreEqual(0, Dictionary.Keys.Count);
 		}
 
 		[Test]
@@ -473,7 +480,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem(); RemoveItem();
 
-			Assert.That(Dictionary.Values.Count, Is.EqualTo(0));
+			Assert.AreEqual(0, Dictionary.Values.Count);
 		}
 
 		[Test]
@@ -481,7 +488,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem(); RemoveItem();
 
-			Assert.That(Dictionary.ContainsKey(Item.Key), Is.False);
+			Assert.False(Dictionary.ContainsKey(Item.Key));
 		}
 
 		[Test]
@@ -489,7 +496,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem(); RemoveItem();
 
-			Assert.That(Collection.Contains(Item), Is.False);
+			Assert.False(Collection.Contains(Item));
 		}
 
 		[Test]
@@ -497,7 +504,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem(); RemoveItem();
 
-			Assert.That(Dictionary.Keys.Contains(Item.Key), Is.False);
+			Assert.False(Dictionary.Keys.Contains(Item.Key));
 		}
 
 		[Test]
@@ -505,7 +512,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem(); RemoveItem();
 
-			Assert.That(Dictionary.Values.Contains(Item.Value), Is.False);
+			Assert.False(Dictionary.Values.Contains(Item.Value));
 		}
 
 		[Test]
@@ -525,8 +532,8 @@ namespace CastleTests.Core.Tests.Internal
 			TValue value;
 			var result = Dictionary.TryGetValue(Item.Key, out value);
 
-			Assert.That(result, Is.False);
-			Assert.That(value,  Is.EqualTo(default(TValue)));
+			Assert.False(result);
+			Assert.AreEqual(default(TValue), value);
 		}
 
 		[Test]
@@ -536,8 +543,8 @@ namespace CastleTests.Core.Tests.Internal
 
 			using (var e = Dictionary.GetEnumerator())
 			{
-				Assert.That(e,            Is.Not.Null);
-				Assert.That(e.MoveNext(), Is.False);
+				Assert.IsNotNull(e);
+				Assert.False(e.MoveNext());
 			}
 		}
 
@@ -548,8 +555,8 @@ namespace CastleTests.Core.Tests.Internal
 
 			using (var e = Dictionary.Keys.GetEnumerator())
 			{
-				Assert.That(e,            Is.Not.Null);
-				Assert.That(e.MoveNext(), Is.False);
+				Assert.IsNotNull(e);
+				Assert.False(e.MoveNext());
 			}
 		}
 
@@ -560,8 +567,8 @@ namespace CastleTests.Core.Tests.Internal
 
 			using (var e = Dictionary.Values.GetEnumerator())
 			{
-				Assert.That(e,            Is.Not.Null);
-				Assert.That(e.MoveNext(), Is.False);
+				Assert.IsNotNull(e);
+				Assert.False(e.MoveNext());
 			}
 		}
 
@@ -571,8 +578,8 @@ namespace CastleTests.Core.Tests.Internal
 			CreateDictionary(); AddItem(); RemoveItem();
 
 			var e = AsEnumerable(Dictionary).GetEnumerator();
-			Assert.That(e,            Is.Not.Null);
-			Assert.That(e.MoveNext(), Is.False);
+			Assert.IsNotNull(e);
+			Assert.False(e.MoveNext());
 		}
 
 		[Test]
@@ -581,8 +588,8 @@ namespace CastleTests.Core.Tests.Internal
 			CreateDictionary(); AddItem(); RemoveItem();
 
 			var e = AsEnumerable(Dictionary.Keys).GetEnumerator();
-			Assert.That(e,            Is.Not.Null);
-			Assert.That(e.MoveNext(), Is.False);
+			Assert.IsNotNull(e);
+			Assert.False(e.MoveNext());
 		}
 
 		[Test]
@@ -591,8 +598,8 @@ namespace CastleTests.Core.Tests.Internal
 			CreateDictionary(); AddItem(); RemoveItem();
 
 			var e = AsEnumerable(Dictionary.Values).GetEnumerator();
-			Assert.That(e,            Is.Not.Null);
-			Assert.That(e.MoveNext(), Is.False);
+			Assert.IsNotNull(e);
+			Assert.False(e.MoveNext());
 		}
 
 		[Test]
@@ -604,7 +611,7 @@ namespace CastleTests.Core.Tests.Internal
 
 			Dictionary.CopyTo(modified, 1);
 
-			Assert.That(modified, Is.EquivalentTo(original));
+			CollectionAssert.AreEquivalent(original, modified);
 		}
 
 		[Test]
@@ -616,7 +623,7 @@ namespace CastleTests.Core.Tests.Internal
 
 			Dictionary.Keys.CopyTo(modified, 1);
 
-			Assert.That(modified, Is.EquivalentTo(original));
+			CollectionAssert.AreEquivalent(original, modified);
 		}
 
 		[Test]
@@ -628,7 +635,7 @@ namespace CastleTests.Core.Tests.Internal
 
 			Dictionary.Values.CopyTo(modified, 1);
 
-			Assert.That(modified, Is.EquivalentTo(original));
+			CollectionAssert.AreEquivalent(original, modified);
 		}
 
 		[Test]
@@ -637,7 +644,7 @@ namespace CastleTests.Core.Tests.Internal
 			CreateDictionary(); AddItem(); ResetItem(); AddItem(); GC.Collect();
 
 			// Collected items are counted until TrimDeadObjects() is called
-			Assert.That(Dictionary.Count, Is.EqualTo(2));
+			Assert.AreEqual(2, Dictionary.Count);
 		}
 
 		[Test]
@@ -646,7 +653,7 @@ namespace CastleTests.Core.Tests.Internal
 			CreateDictionary(); AddItem(); ResetItem(); AddItem(); GC.Collect();
 
 			// Collected items are counted until TrimDeadObjects() is called
-			Assert.That(Dictionary.Keys.Count, Is.EqualTo(2));
+			Assert.AreEqual(2, Dictionary.Keys.Count);
 		}
 
 		[Test]
@@ -655,7 +662,7 @@ namespace CastleTests.Core.Tests.Internal
 			CreateDictionary(); AddItem(); ResetItem(); AddItem(); GC.Collect();
 
 			// Collected items are counted until TrimDeadObjects() is called
-			Assert.That(Dictionary.Values.Count, Is.EqualTo(2));
+			Assert.AreEqual(2, Dictionary.Values.Count);
 		}
 
 		[Test]
@@ -663,7 +670,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem(); ResetItem(); AddItem(); GC.Collect();
 
-			Assert.That(Dictionary.ContainsKey(Item.Key), Is.True);
+			Assert.True(Dictionary.ContainsKey(Item.Key));
 		}
 
 		[Test]
@@ -671,7 +678,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem(); ResetItem(); AddItem(); GC.Collect();
 
-			Assert.That(Collection.Contains(Item), Is.True);
+			Assert.True(Collection.Contains(Item));
 		}
 
 		[Test]
@@ -679,7 +686,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem(); ResetItem(); AddItem(); GC.Collect();
 
-			Assert.That(Dictionary.Keys.Contains(Item.Key), Is.True);
+			Assert.True(Dictionary.Keys.Contains(Item.Key));
 		}
 
 		[Test]
@@ -687,7 +694,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem(); ResetItem(); AddItem(); GC.Collect();
 
-			Assert.That(Dictionary.Values.Contains(Item.Value), Is.True);
+			Assert.True(Dictionary.Values.Contains(Item.Value));
 		}
 
 		[Test]
@@ -695,7 +702,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary(); AddItem(); ResetItem(); AddItem(); GC.Collect();
 
-			Assert.That(Dictionary[Item.Key], Is.EqualTo(Item.Value));
+			Assert.AreEqual(Item.Value, Dictionary[Item.Key]);
 		}
 
 		[Test]
@@ -706,8 +713,8 @@ namespace CastleTests.Core.Tests.Internal
 			TValue value;
 			var result = Dictionary.TryGetValue(Item.Key, out value);
 
-			Assert.That(result, Is.True);
-			Assert.That(value,  Is.EqualTo(Item.Value));
+			Assert.True(result);
+			Assert.AreEqual(Item.Value, value);
 		}
 
 		[Test]
@@ -717,10 +724,10 @@ namespace CastleTests.Core.Tests.Internal
 
 			using (var e = Dictionary.GetEnumerator())
 			{
-				Assert.That(e,            Is.Not.Null);
-				Assert.That(e.MoveNext(), Is.True);
-				Assert.That(e.Current,    Is.EqualTo(Item));
-				Assert.That(e.MoveNext(), Is.False);
+				Assert.IsNotNull(e);
+				Assert.True(e.MoveNext());
+				Assert.AreEqual(Item, e.Current);
+				Assert.False(e.MoveNext());
 			}
 		}
 
@@ -731,10 +738,10 @@ namespace CastleTests.Core.Tests.Internal
 
 			using (var e = Dictionary.Keys.GetEnumerator())
 			{
-				Assert.That(e,            Is.Not.Null);
-				Assert.That(e.MoveNext(), Is.True);
-				Assert.That(e.Current,    Is.EqualTo(Item.Key));
-				Assert.That(e.MoveNext(), Is.False);
+				Assert.IsNotNull(e);
+				Assert.True(e.MoveNext());
+				Assert.AreEqual(Item.Key, e.Current);
+				Assert.False(e.MoveNext());
 			}
 		}
 
@@ -746,13 +753,13 @@ namespace CastleTests.Core.Tests.Internal
 			using (var e = Dictionary.Values.GetEnumerator())
 			{
 				// Values for collected keys are present until TrimDeadObjects() is called
-				Assert.That(e,            Is.Not.Null);
-				Assert.That(e.MoveNext(), Is.True);
-				Assert.That(e.Current,    Is.Not.EqualTo(Item.Value));
-				Assert.That(e.Current,    Is.Not.EqualTo(OtherItem.Value));
-				Assert.That(e.MoveNext(), Is.True);
-				Assert.That(e.Current,    Is.EqualTo(Item.Value));
-				Assert.That(e.MoveNext(), Is.False);
+				Assert.IsNotNull(e);
+				Assert.True(e.MoveNext());
+				Assert.AreNotEqual(Item.Value, e.Current);
+				Assert.AreNotEqual(OtherItem.Value, e.Current);
+				Assert.True(e.MoveNext());
+				Assert.AreEqual(Item.Value, e.Current);
+				Assert.False(e.MoveNext());
 			}
 		}
 
@@ -762,10 +769,10 @@ namespace CastleTests.Core.Tests.Internal
 			CreateDictionary(); AddItem(); ResetItem(); AddItem(); GC.Collect();
 
 			var e = AsEnumerable(Dictionary).GetEnumerator();
-			Assert.That(e,            Is.Not.Null);
-			Assert.That(e.MoveNext(), Is.True);
-			Assert.That(e.Current,    Is.EqualTo(Item));
-			Assert.That(e.MoveNext(), Is.False);
+			Assert.IsNotNull(e);
+			Assert.True(e.MoveNext());
+			Assert.AreEqual(Item, e.Current);
+			Assert.False(e.MoveNext());
 		}
 
 		[Test]
@@ -774,10 +781,10 @@ namespace CastleTests.Core.Tests.Internal
 			CreateDictionary(); AddItem(); ResetItem(); AddItem(); GC.Collect();
 
 			var e = AsEnumerable(Dictionary.Keys).GetEnumerator();
-			Assert.That(e,            Is.Not.Null);
-			Assert.That(e.MoveNext(), Is.True);
-			Assert.That(e.Current,    Is.EqualTo(Item.Key));
-			Assert.That(e.MoveNext(), Is.False);
+			Assert.IsNotNull(e);
+			Assert.True(e.MoveNext());
+			Assert.AreEqual(Item.Key, e.Current);
+			Assert.False(e.MoveNext());
 		}
 
 		[Test]
@@ -787,13 +794,13 @@ namespace CastleTests.Core.Tests.Internal
 
 			// Values for collected keys are present until TrimDeadObjects() is called
 			var e = AsEnumerable(Dictionary.Values).GetEnumerator();
-			Assert.That(e,            Is.Not.Null);
-			Assert.That(e.MoveNext(), Is.True);
-			Assert.That(e.Current,    Is.Not.EqualTo(Item.Value));
-			Assert.That(e.Current,    Is.Not.EqualTo(OtherItem.Value));
-			Assert.That(e.MoveNext(), Is.True);
-			Assert.That(e.Current,    Is.EqualTo(Item.Value));
-			Assert.That(e.MoveNext(), Is.False);
+			Assert.IsNotNull(e);
+			Assert.True(e.MoveNext());
+			Assert.AreNotEqual(Item.Value, e.Current);
+			Assert.AreNotEqual(OtherItem.Value, e.Current);
+			Assert.True(e.MoveNext());
+			Assert.AreEqual(Item.Value, e.Current);
+			Assert.False(e.MoveNext());
 		}
 
 		[Test]
@@ -805,9 +812,9 @@ namespace CastleTests.Core.Tests.Internal
 
 			Dictionary.CopyTo(modified, 1);
 
-			Assert.That(modified[0], Is.EqualTo(original[0]));
-			Assert.That(modified[1], Is.EqualTo(Item));
-			Assert.That(modified[2], Is.EqualTo(original[2]));
+			Assert.AreEqual(original[0], modified[0]);
+			Assert.AreEqual(Item, modified[1]);
+			Assert.AreEqual(original[2], modified[2]);
 		}
 
 		[Test]
@@ -819,9 +826,9 @@ namespace CastleTests.Core.Tests.Internal
 
 			Dictionary.Keys.CopyTo(modified, 1);
 
-			Assert.That(modified[0], Is.EqualTo(original[0]));
-			Assert.That(modified[1], Is.EqualTo(Item.Key));
-			Assert.That(modified[2], Is.EqualTo(original[2]));
+			Assert.AreEqual(original[0], modified[0]);
+			Assert.AreEqual(Item.Key, modified[1]);
+			Assert.AreEqual(original[2], modified[2]);
 		}
 
 		[Test]
@@ -834,10 +841,10 @@ namespace CastleTests.Core.Tests.Internal
 			Dictionary.Values.CopyTo(modified, 1);
 
 			// Values for collected keys are present until TrimDeadObjects() is called
-			Assert.That(modified[0], Is    .EqualTo(original[0]));
-			Assert.That(modified[1], Is.Not.EqualTo(original[1]));
-			Assert.That(modified[1], Is.Not.EqualTo(Item.Value));
-			Assert.That(modified[2], Is    .EqualTo(Item.Value));
+			Assert.AreEqual(original[0], modified[0]);
+			Assert.AreNotEqual(original[1], modified[1]);
+			Assert.AreNotEqual(Item.Value, modified[1]);
+			Assert.AreEqual(Item.Value, modified[2]);
 		}
 
 		[Test]
@@ -845,7 +852,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary();
 
-			Assert.That(Collection.IsReadOnly, Is.False);
+			Assert.False(Collection.IsReadOnly);
 		}
 
 		[Test]
@@ -853,7 +860,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary();
 
-			Assert.That(Dictionary.Keys.IsReadOnly, Is.True);
+			Assert.True(Dictionary.Keys.IsReadOnly);
 		}
 
 		[Test]
@@ -861,7 +868,7 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			CreateDictionary();
 
-			Assert.That(Dictionary.Values.IsReadOnly, Is.True);
+			Assert.True(Dictionary.Values.IsReadOnly);
 		}
 
 		[Test]
@@ -937,11 +944,17 @@ namespace CastleTests.Core.Tests.Internal
 		{
 			int dummy;
 			for (var i = 0; i < 128; i++)
+			{
 				dummy = Dictionary.Count;
+			}
 		}
 
+#if FEATURE_XUNITNET
+		public void Dispose()
+#else
 		[TearDown]
 		public void TearDown()
+#endif
 		{
 			Dictionary = null;
 			ResetItem();

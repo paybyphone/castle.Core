@@ -52,14 +52,14 @@ namespace CastleTests
 			// return value is changed by the interceptor
 			Assert.AreEqual(true, instance.Valid);
 
-			Assert.AreEqual(45, instance.Sum((byte)20, (byte)25)); // byte
-			Assert.AreEqual(45, instance.Sum(20L, 25L)); // long
-			Assert.AreEqual(45, instance.Sum((short)20, (short)25)); // short
-			Assert.AreEqual(45, instance.Sum(20f, 25f)); // float
-			Assert.AreEqual(45, instance.Sum(20.0, 25.0)); // double
-			Assert.AreEqual(45, instance.Sum((ushort)20, (ushort)25)); // ushort
-			Assert.AreEqual(45, instance.Sum((uint)20, (uint)25)); // uint
-			Assert.AreEqual(45, instance.Sum((ulong)20, (ulong)25)); // ulong
+			Assert.AreEqual((byte)45, instance.Sum((byte)20, (byte)25)); // byte
+			Assert.AreEqual(45L, instance.Sum(20L, 25L)); // long
+			Assert.AreEqual((short)45, instance.Sum((short)20, (short)25)); // short
+			Assert.AreEqual(45f, instance.Sum(20f, 25f)); // float
+			Assert.AreEqual(45.0, instance.Sum(20.0, 25.0)); // double
+			Assert.AreEqual((ushort)45, instance.Sum((ushort)20, (ushort)25)); // ushort
+			Assert.AreEqual((uint)45, instance.Sum((uint)20, (uint)25)); // uint
+			Assert.AreEqual((ulong)45, instance.Sum((ulong)20, (ulong)25)); // ulong
 		}
 
 		[Test]
@@ -77,8 +77,10 @@ namespace CastleTests
 #pragma warning restore 219
 		}
 
-#if !MONO
 		[Test]
+#if __MonoCS__
+		[Ignore("Expected: Castle.DynamicProxy.Generators.GeneratorException, But was: System.ArgumentNullException")]
+#endif
 		public void ProxyForNonPublicClass()
 		{
 			// have to use a type that is not from this assembly, because it is marked as internals visible to 
@@ -90,7 +92,6 @@ namespace CastleTests
 				"Can not create proxy for type System.AppDomainInitializerInfo because it is not accessible. Make it public, or internal and mark your assembly with [assembly: InternalsVisibleTo(\"DynamicProxyGenAssembly2, PublicKey=0024000004800000940000000602000000240000525341310004000001000100c547cac37abd99c8db225ef2f6c8a3602f3b3606cc9891605d02baa56104f4cfc0734aa39b93bf7852f7d9266654753cc297e7d2edfe0bac1cdcf9f717241550e0a7b191195b7667bb4f64bcb8e2121380fd1d9d46ad2d92d2d15605093924cceaf74c4861eff62abf69b9291ed0a340e113be11e6a7d3113e92484cf7045cc7\")] attribute, because assembly mscorlib is strong-named.",
 				exception.Message);
 		}
-#endif
 
 		[Test]
 		public void ProxyForClassWithIndexer()
@@ -117,7 +118,7 @@ namespace CastleTests
 		}
 
 
-#if !MONO && !SILVERLIGHT
+#if !SILVERLIGHT
 		[Test]
 		public void ClassWithDifferentAccessLevelOnProperties()
 		{
@@ -285,6 +286,9 @@ namespace CastleTests
 		}
 
 		[Test]
+#if DOTNET35
+		[Ignore("https://support.microsoft.com/en-us/kb/960240")]
+#endif
 		public void ProxyTypeWithMultiDimentionalArrayAsParameters()
 		{
 			LogInvocationInterceptor log = new LogInvocationInterceptor();
@@ -369,13 +373,13 @@ namespace CastleTests
 			object proxy = generator.CreateClassProxy(t1, new Type[] {t2}, new StandardInterceptor());
 			Assert.IsFalse(StrongNameUtil.IsAssemblySigned(proxy.GetType().Assembly));
 		}
+
 #if SILVERLIGHT // Silverlight test runner treats Assert.Ignore as failed test :/
 		[Ignore]
 #endif
 		[Test]
 		public void ProxyForBaseTypeAndInterfaceFromSignedAndUnsignedAssemblies1()
 		{
-			
 			if(TestAssemblySigned())
 			{
 				Assert.Ignore("To get this running, the Tests project must not be signed.");

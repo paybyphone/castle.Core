@@ -117,42 +117,47 @@ namespace Castle.DynamicProxy.Tests
 			emitter.CreateMethod("MyMethod", MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.Virtual,
 			                     typeof(void), Type.EmptyTypes);
 			Type t = emitter.BuildType();
-			Assert.IsTrue(t.IsInterface);
+			Assert.IsTrue(t.GetTypeInfo().IsInterface);
 			MethodInfo method = t.GetMethod("MyMethod");
 			Assert.IsNotNull(method);
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void NoBaseTypeForInterfaces()
 		{
 			DisableVerification();
 			ClassEmitter emitter = new ClassEmitter (generator.ProxyBuilder.ModuleScope, "IFoo", null, Type.EmptyTypes,
 				TypeAttributes.Interface | TypeAttributes.Abstract | TypeAttributes.Public, false);
 
+			Assert.Throws<InvalidOperationException>(delegate {
 #pragma warning disable 219
-			Type t = emitter.BaseType;
+				Type t = emitter.BaseType;
 #pragma warning restore 219
+			});
 		}
 
 		[Test]
-		[ExpectedException (typeof (InvalidOperationException))]
 		public void NoDefaultCtorForInterfaces()
 		{
 			DisableVerification();
 			ClassEmitter emitter = new ClassEmitter(generator.ProxyBuilder.ModuleScope, "IFoo", null, Type.EmptyTypes,
 				TypeAttributes.Interface | TypeAttributes.Abstract | TypeAttributes.Public, false);
-			emitter.CreateDefaultConstructor();
+
+			Assert.Throws<InvalidOperationException>(delegate {
+				emitter.CreateDefaultConstructor();
+			});
 		}
 
 		[Test]
-		[ExpectedException (typeof (InvalidOperationException))]
 		public void NoCustomCtorForInterfaces()
 		{
 			DisableVerification();
 			ClassEmitter emitter = new ClassEmitter(generator.ProxyBuilder.ModuleScope, "IFoo", null, Type.EmptyTypes,
 				TypeAttributes.Interface | TypeAttributes.Abstract | TypeAttributes.Public, false);
-			emitter.CreateConstructor();
+
+			Assert.Throws<InvalidOperationException>(delegate {
+				emitter.CreateConstructor();
+			});
 		}
 
 		[Test]
@@ -166,7 +171,7 @@ namespace Castle.DynamicProxy.Tests
 			                          typeof(void), Type.EmptyTypes);
 			Type inner = innerEmitter.BuildType();
 			Type outer = outerEmitter.BuildType();
-			Assert.IsTrue(inner.IsInterface);
+			Assert.IsTrue(inner.GetTypeInfo().IsInterface);
 			MethodInfo method = inner.GetMethod("MyMethod");
 			Assert.IsNotNull(method);
 			Assert.AreSame(inner, outer.GetNestedType("IInner", BindingFlags.Public));

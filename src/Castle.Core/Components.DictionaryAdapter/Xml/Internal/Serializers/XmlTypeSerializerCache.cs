@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if !SILVERLIGHT && !MONO // Until support for other platforms is verified
+#if !SILVERLIGHT // Until support for other platforms is verified
 namespace Castle.Components.DictionaryAdapter.Xml
 {
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
+	using System.Reflection;
 	using System.Xml.Serialization;
 
 	internal class XmlTypeSerializerCache : SingletonDispenser<Type, XmlTypeSerializer>
@@ -53,10 +54,10 @@ namespace Castle.Components.DictionaryAdapter.Xml
 
 		private static XmlTypeSerializer CreateSerializer(Type type)
 		{
-			if (type.IsArray)
+			if (type.GetTypeInfo().IsArray)
 				return XmlArraySerializer.Instance;
 
-			if (type.IsGenericType)
+			if (type.GetTypeInfo().IsGenericType)
 			{
 				var genericType = type.GetGenericTypeDefinition();
 				if (genericType == typeof(IList<>) ||
@@ -88,10 +89,10 @@ namespace Castle.Components.DictionaryAdapter.Xml
 					throw Error.UnsupportedCollectionType(type);
 			}
 
-			if (type.IsInterface)
-			    return XmlComponentSerializer.Instance;
-		    if (type.IsEnum)
-		        return XmlEnumerationSerializer.Instance;
+			if (type.GetTypeInfo().IsInterface)
+				return XmlComponentSerializer.Instance;
+			if (type.GetTypeInfo().IsEnum)
+				return XmlEnumerationSerializer.Instance;
 			if (type.IsCustomSerializable())
 				return XmlCustomSerializer.Instance;
 #if !SILVERLIGHT

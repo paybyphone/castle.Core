@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if !SILVERLIGHT && !MONO // Until support for other platforms is verified
+#if !SILVERLIGHT // Until support for other platforms is verified
 namespace CastleTests.Components.DictionaryAdapter.Xml.Tests
 {
 	using System;
@@ -167,10 +167,10 @@ namespace CastleTests.Components.DictionaryAdapter.Xml.Tests
 			var node = new DummyXmlNode(value.GetType());
 
 			serializer.SetValue(node, null, null, null, ref value);
-			Assert.That(node.Value, Is.EqualTo(text));
+			Assert.AreEqual(text, node.Value);
 
 			var actual = serializer.GetValue(node, null, null);
-			Assert.That(actual, Is.EqualTo(value));
+			Assert.AreEqual(value, actual);
 		}
 	}
 }

@@ -17,17 +17,8 @@ namespace Castle.DynamicProxy
 	using System;
 	using System.Diagnostics;
 	using System.Reflection;
-	using System.Runtime.Serialization;
-	using Castle.DynamicProxy.Serialization;
-
-#if DOTNET40
-	using System.Security;
-#endif
 
 	public abstract class AbstractInvocation : IInvocation
-#if !SILVERLIGHT
-		, ISerializable
-#endif
 	{
 		private readonly IInterceptor[] interceptors;
 		private readonly object[] arguments;
@@ -151,17 +142,6 @@ namespace Castle.DynamicProxy
 			}
 		}
 
-#if !SILVERLIGHT
-#if DOTNET40
-		[SecurityCritical]
-#endif
-		public void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			info.SetType(typeof(RemotableInvocation));
-			info.AddValue("invocation", new RemotableInvocation(this));
-		}
-#endif
-
 		protected abstract void InvokeMethodOnTarget();
 
 		protected void ThrowOnNoTarget()
@@ -179,7 +159,7 @@ namespace Castle.DynamicProxy
 
 			string methodKindIs;
 			string methodKindDescription;
-			if (Method.DeclaringType.IsClass && Method.IsAbstract)
+			if (Method.DeclaringType.GetTypeInfo().IsClass && Method.IsAbstract)
 			{
 				methodKindIs = "is abstract";
 				methodKindDescription = "an abstract method";

@@ -26,8 +26,12 @@ namespace Castle.DynamicProxy.Tests
 		private OtherMixin otherMixin;
 		private ComplexMixin complexMixin;
 
+#if FEATURE_XUNITNET
+		public MixinDataTestCase()
+#else
 		[SetUp]
 		public void SetUp()
+#endif
 		{
 			simpleMixin = new SimpleMixin();
 			otherMixin = new OtherMixin();
@@ -184,13 +188,14 @@ namespace Castle.DynamicProxy.Tests
 		}
 
 		[Test]
-		[ExpectedException(typeof(ArgumentException))]
 		public void TwoMixinsWithSameInterfaces()
 		{
 			SimpleMixin mixin1 = new SimpleMixin();
 			OtherMixinImplementingISimpleMixin mixin2 = new OtherMixinImplementingISimpleMixin();
 
-			new MixinData(new object[] { mixin1, mixin2 });
+			Assert.Throws<ArgumentException>(() =>
+				new MixinData(new object[] { mixin1, mixin2 })
+			);
 		}
 	}
 }

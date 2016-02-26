@@ -16,6 +16,7 @@ namespace Castle.DynamicProxy.Tests
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Reflection.Emit;
 
 	using Castle.DynamicProxy.Tests.Mixins;
 
@@ -23,26 +24,33 @@ namespace Castle.DynamicProxy.Tests
 
 	using NUnit.Framework;
 
+	using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+
 	[TestFixture]
 	public class ProxyGenerationOptionsTestCase
 	{
 		private ProxyGenerationOptions _options1;
 		private ProxyGenerationOptions _options2;
 
+#if FEATURE_XUNITNET
+		public ProxyGenerationOptionsTestCase()
+#else
 		[SetUp]
 		public void Init()
+#endif
 		{
 			_options1 = new ProxyGenerationOptions();
 			_options2 = new ProxyGenerationOptions();
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void MixinData_NeedsInitialize()
 		{
+			Assert.Throws<InvalidOperationException>(delegate {
 #pragma warning disable 219
-			MixinData data = _options1.MixinData;
+				MixinData data = _options1.MixinData;
 #pragma warning restore 219
+			});
 		}
 
 		[Test]
@@ -193,6 +201,58 @@ namespace Castle.DynamicProxy.Tests
 		}
 
 		[Test]
+		public void Equals_DifferentAdditionalAttributes()
+		{
+			var builder1 = new CustomAttributeBuilder(typeof(DescriptionAttribute).GetConstructor(new[] { typeof(string) }), new object[] { "Test1" });
+			var builder2 = new CustomAttributeBuilder(typeof(DescriptionAttribute).GetConstructor(new[] { typeof(string) }), new object[] { "Test2" });
+
+			_options1.AdditionalAttributes.Add(builder1);
+			_options2.AdditionalAttributes.Add(builder2);
+
+			Assert.AreNotEqual(_options1, _options2);
+		}
+
+		[Test]
+		public void Equals_SameAdditionalAttributes()
+		{
+			var builder = new CustomAttributeBuilder(typeof(DescriptionAttribute).GetConstructor(new[] { typeof(string) }), new object[] { "Test" });
+			_options1.AdditionalAttributes.Add(builder);
+			_options2.AdditionalAttributes.Add(builder);
+
+			Assert.AreEqual(_options1, _options2);
+		}
+
+		[Test]
+		public void Equals_SameAdditionalAttributesDifferentOrder()
+		{
+			var builder1 = new CustomAttributeBuilder(typeof(DescriptionAttribute).GetConstructor(new[] { typeof(string) }), new object[] { "Test1" });
+			var builder2 = new CustomAttributeBuilder(typeof(DescriptionAttribute).GetConstructor(new[] { typeof(string) }), new object[] { "Test2" });
+
+			_options1.AdditionalAttributes.Add(builder1);
+			_options1.AdditionalAttributes.Add(builder2);
+
+			_options2.AdditionalAttributes.Add(builder2);
+			_options2.AdditionalAttributes.Add(builder1);
+
+			Assert.AreEqual(_options1, _options2);
+		}
+
+		[Test]
+		public void Equals_DifferentAdditionalAttributesDuplicateEntries()
+		{
+			var builder1 = new CustomAttributeBuilder(typeof(DescriptionAttribute).GetConstructor(new[] { typeof(string) }), new object[] { "Test1" });
+			var builder2 = new CustomAttributeBuilder(typeof(DescriptionAttribute).GetConstructor(new[] { typeof(string) }), new object[] { "Test2" });
+
+			_options1.AdditionalAttributes.Add(builder1);
+			_options1.AdditionalAttributes.Add(builder1);
+
+			_options2.AdditionalAttributes.Add(builder1);
+			_options2.AdditionalAttributes.Add(builder2);
+
+			Assert.AreNotEqual(_options1, _options2);
+		}
+
+		[Test]
 		public void GetHashCode_EmptyOptions()
 		{
 			Assert.AreEqual(_options1.GetHashCode(), _options2.GetHashCode());
@@ -263,6 +323,57 @@ namespace Castle.DynamicProxy.Tests
 		public void GetHashCode_DifferentOptions_Selector()
 		{
 			_options1.Selector = new AllInterceptorSelector();
+
+			Assert.AreNotEqual(_options1.GetHashCode(), _options2.GetHashCode());
+		}
+
+		[Test]
+		public void GetHashCode_EqualOptions_SameAdditionalAttributes()
+		{
+			var builder = new CustomAttributeBuilder(typeof(DescriptionAttribute).GetConstructor(new [] { typeof(string) }), new object[] { "Test" });
+			_options1.AdditionalAttributes.Add(builder);
+			_options2.AdditionalAttributes.Add(builder);
+
+			Assert.AreEqual(_options1.GetHashCode(), _options2.GetHashCode());
+		}
+
+		[Test]
+		public void GetHashCode_EqualOptions_SameAdditionalAttributesDifferentOrder()
+		{
+			var builder1 = new CustomAttributeBuilder(typeof(DescriptionAttribute).GetConstructor(new[] { typeof(string) }), new object[] { "Test1" });
+			var builder2 = new CustomAttributeBuilder(typeof(DescriptionAttribute).GetConstructor(new[] { typeof(string) }), new object[] { "Test2" });
+
+			_options1.AdditionalAttributes.Add(builder1);
+			_options1.AdditionalAttributes.Add(builder2);
+
+			_options2.AdditionalAttributes.Add(builder2);
+			_options2.AdditionalAttributes.Add(builder1);
+
+			Assert.AreEqual(_options1.GetHashCode(), _options2.GetHashCode());
+		}
+
+		[Test]
+		public void GetHashCode_DifferentOptions_DifferentAdditionalAttributes()
+		{
+			var builder1 = new CustomAttributeBuilder(typeof(DescriptionAttribute).GetConstructor(new[] { typeof(string) }), new object[] { "Test1" });
+			var builder2 = new CustomAttributeBuilder(typeof(DescriptionAttribute).GetConstructor(new[] { typeof(string) }), new object[] { "Test2" });
+
+			_options1.AdditionalAttributes.Add(builder1);
+			_options2.AdditionalAttributes.Add(builder2);
+
+			Assert.AreNotEqual(_options1.GetHashCode(), _options2.GetHashCode());
+		}
+
+		[Test]
+		public void GetHashCode_DifferentOptions_SameAdditionalAttributesButDuplicateEntries()
+		{
+			var builder = new CustomAttributeBuilder(typeof(DescriptionAttribute).GetConstructor(new[] { typeof(string) }), new object[] { "Test1" });
+
+			_options1.AdditionalAttributes.Add(builder);
+
+			_options2.AdditionalAttributes.Add(builder);
+			_options2.AdditionalAttributes.Add(builder);
+			_options2.AdditionalAttributes.Add(builder);
 
 			Assert.AreNotEqual(_options1.GetHashCode(), _options2.GetHashCode());
 		}

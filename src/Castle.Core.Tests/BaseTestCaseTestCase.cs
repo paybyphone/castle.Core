@@ -19,6 +19,8 @@ namespace Castle.DynamicProxy.Tests
 	using System.Reflection;
 	using System.Reflection.Emit;
 
+	using Castle.Core.Tests;
+
 	using NUnit.Framework;
 
 	[TestFixture]
@@ -29,6 +31,7 @@ namespace Castle.DynamicProxy.Tests
 			ResetGeneratorAndBuilder(); // we call TearDown ourselves in these test cases
 			base.TearDown();
 		}
+
 		[Test]
 #if SILVERLIGHT
 		[Ignore("This passes in NUnit, but when run in a Browser test harness like UnitDriven this failed because of access to the disk???")]
@@ -37,7 +40,9 @@ namespace Castle.DynamicProxy.Tests
 		{
 			string path = ModuleScope.DEFAULT_FILE_NAME;
 			if (File.Exists(path))
+			{
 				File.Delete(path);
+			}
 
 			base.TearDown();
 
@@ -45,27 +50,27 @@ namespace Castle.DynamicProxy.Tests
 		}
 
 		[Test]
-#if SILVERLIGHT || MONO
-		[Ignore("Cannot do in Silverlight or Mono.")]
+#if SILVERLIGHT
+		[Ignore("Cannot do in Silverlight")]
+#endif
+#if __MonoCS__
+		[Ignore("Expected: True  But was: False")]
 #endif
 		public void TearDown_SavesAssembly_IfProxyGenerated()
 		{
 			string path = ModuleScope.DEFAULT_FILE_NAME;
 			if (File.Exists(path))
+			{
 				File.Delete(path);
+			}
 
-			generator.CreateClassProxy(typeof (object), new StandardInterceptor());
+			generator.CreateClassProxy(typeof(object), new StandardInterceptor());
 
 			base.TearDown();
 			Assert.IsTrue(File.Exists(path));
 		}
 
-		[Test]
-#if SILVERLIGHT || MONO
-		[Ignore("Cannot do in Silverlight or Mono.")]
-#endif
-		[ExpectedException(typeof (AssertionException))]
-		public void TearDown_FindsVerificationErrors()
+		private void FindVerificationErrors()
 		{
 			ModuleBuilder moduleBuilder = generator.ProxyBuilder.ModuleScope.ObtainDynamicModule(true);
 			TypeBuilder invalidType = moduleBuilder.DefineType("InvalidType");
@@ -75,16 +80,35 @@ namespace Castle.DynamicProxy.Tests
 			invalidType.CreateType();
 
 			if (!IsVerificationDisabled)
+			{
 				Console.WriteLine("This next test case is expected to yield a verification error.");
+			}
 
 			base.TearDown();
+		}
+
+		[Test]
+#if SILVERLIGHT
+		[Ignore("Cannot do in Silverlight")]
+#endif
+		[Platform(Exclude = "mono", Reason = "Mono doesn't have peverify, so we can't perform verification.")]
+		public void TearDown_FindsVerificationErrors()
+		{
+#if FEATURE_XUNITNET
+			var ex = Assert.Throws<Xunit.Sdk.TrueException>(() => FindVerificationErrors());
+#else
+			var ex = Assert.Throws<AssertionException>(() => FindVerificationErrors());
+#endif
+			StringAssert.Contains("PeVerify reported error(s)", ex.Message);
+			StringAssert.Contains("fall through end of the method without returning", ex.Message);
 		}
 
 		[Test]
 		public void DisableVerification_DisablesVerificationForTestCase()
 		{
 			DisableVerification();
-			TearDown_FindsVerificationErrors();
+
+			FindVerificationErrors();
 		}
 
 		[Test]

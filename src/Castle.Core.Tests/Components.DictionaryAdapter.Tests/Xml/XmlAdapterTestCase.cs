@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if !SILVERLIGHT && !MONO // Until support for other platforms is verified
+#if !SILVERLIGHT // Until support for other platforms is verified
 namespace Castle.Components.DictionaryAdapter.Xml.Tests
 {
 	using System;
@@ -24,9 +24,14 @@ namespace Castle.Components.DictionaryAdapter.Xml.Tests
 	{
 		private DictionaryAdapterFactory factory;
 
-		protected XmlAdapterTestCase() { }
-
+#if FEATURE_XUNITNET
+		protected XmlAdapterTestCase()
+		{
+			SetUp();
+		}
+#else
 		[SetUp]
+#endif
 		public virtual void SetUp()
 		{
 			factory = new DictionaryAdapterFactory();

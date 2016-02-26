@@ -24,8 +24,12 @@ namespace Castle.Core.Tests
 	{
 		private SlimReadWriteLock @lock;
 
+#if FEATURE_XUNITNET
+		public SlimReadWriteLockTestCase()
+#else
 		[SetUp]
 		public void SetUp()
+#endif
 		{
 			@lock = new SlimReadWriteLock();
 		}
@@ -105,7 +109,6 @@ namespace Castle.Core.Tests
 			}
 		}
 
-#if !MONO26
 		[Test]
 		public void Can_NOT_be_used_ForReadingUpgradeable_when_used_ForReading()
 		{
@@ -114,7 +117,6 @@ namespace Castle.Core.Tests
 				Assert.Throws(typeof(LockRecursionException), () => @lock.ForReadingUpgradeable());
 			}
 		}
-#endif
 
 		[Test]
 		public void Can_be_used_ForReadingUpgradeable_when_used_ForWriting()

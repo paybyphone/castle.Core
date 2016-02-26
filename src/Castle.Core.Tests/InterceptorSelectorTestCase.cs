@@ -17,7 +17,9 @@ namespace Castle.DynamicProxy.Tests
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
+#if FEATURE_SERIALIZATION
 	using System.Xml.Serialization;
+#endif
 
 	using Castle.DynamicProxy.Generators;
 	using Castle.DynamicProxy.Internal;
@@ -94,7 +96,6 @@ namespace Castle.DynamicProxy.Tests
 			Assert.AreEqual(1, countingInterceptor.Count);
 		}
 
-#if !MONO
 		[Test]
 		public void SelectorWorksForMultipleGenericMethods()
 		{
@@ -113,7 +114,6 @@ namespace Castle.DynamicProxy.Tests
 			Assert.AreEqual(2, countingInterceptor.Count);
 			Assert.AreEqual(default(string), result2);
 		}
-#endif
 
 		[Test]
 		public void SelectorWorksForProperties()
@@ -292,21 +292,27 @@ namespace Castle.DynamicProxy.Tests
 		[Test]
 		public void Cannot_proxy_inaccessible_interface()
 		{
-			var exception = Assert.Throws<GeneratorException>(() => generator.CreateInterfaceProxyWithTarget<PrivateInterface>(new PrivateClass(), new IInterceptor[0]));
-			Assert.That(exception.Message, Is.StringStarting("Can not create proxy for type Castle.DynamicProxy.Tests.InterceptorSelectorTestCase+PrivateInterface because it is not accessible. Make it public, or internal"));
+			var ex = Assert.Throws<GeneratorException>(() =>
+				generator.CreateInterfaceProxyWithTarget<PrivateInterface>(new PrivateClass(), new IInterceptor[0]));
+			StringAssert.StartsWith(
+				"Can not create proxy for type Castle.DynamicProxy.Tests.InterceptorSelectorTestCase+PrivateInterface because it is not accessible. Make it public, or internal",
+				ex.Message);
 		}
 
 		[Test]
 		public void Cannot_proxy_generic_interface_with_inaccessible_type_argument()
 		{
-			var exception = Assert.Throws<GeneratorException>(() => generator.CreateInterfaceProxyWithTarget<IList<PrivateInterface>>(new List<PrivateInterface>(), new IInterceptor[0]));
-			Assert.That(exception.Message, Is.StringStarting("Can not create proxy for type System.Collections.Generic.IList`1[[Castle.DynamicProxy.Tests.InterceptorSelectorTestCase+PrivateInterface, Castle.Core.Tests, Version=0.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc]] because type Castle.DynamicProxy.Tests.InterceptorSelectorTestCase+PrivateInterface is not accessible. Make it public, or internal"));
+			var ex = Assert.Throws<GeneratorException>(() =>
+				generator.CreateInterfaceProxyWithTarget<IList<PrivateInterface>>(new List<PrivateInterface>(), new IInterceptor[0]));
+			StringAssert.StartsWith(
+				"Can not create proxy for type System.Collections.Generic.IList`1[[Castle.DynamicProxy.Tests.InterceptorSelectorTestCase+PrivateInterface, Castle.Core.Tests, Version=0.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc]] because type Castle.DynamicProxy.Tests.InterceptorSelectorTestCase+PrivateInterface is not accessible. Make it public, or internal",
+				ex.Message);
 		}
 
 		[Test]
 		public void Cannot_proxy_generic_interface_with_type_argument_that_has_inaccessible_type_argument()
 		{
-			var exception = Assert.Throws<GeneratorException>(() => generator.CreateInterfaceProxyWithTarget<IList<IList<PrivateInterface>>>(new List<IList<PrivateInterface>>(), new IInterceptor[0]));
+			Assert.Throws<GeneratorException>(() => generator.CreateInterfaceProxyWithTarget<IList<IList<PrivateInterface>>>(new List<IList<PrivateInterface>>(), new IInterceptor[0]));
 		}
 
 		[Test]
@@ -320,7 +326,6 @@ namespace Castle.DynamicProxy.Tests
 		private class PrivateClass : PrivateInterface { }
 	}
 
-#if !MONO
 	public class MultiGenericClass : IMultiGenericInterface
 	{
 		public T1 Method<T1, T2>(T2 p)
@@ -340,9 +345,8 @@ namespace Castle.DynamicProxy.Tests
 
 		T2 Method<T1, T2>(T1 p);
 	}
-#endif
 
-#if !SILVERLIGHT
+#if FEATURE_SERIALIZATION
 	[Serializable]
 #endif
 	public class GenericClass : IGenericInterface
@@ -375,7 +379,7 @@ namespace Castle.DynamicProxy.Tests
 		}
 	}
 
-#if !SILVERLIGHT
+#if FEATURE_SERIALIZATION
 	[Serializable]
 #endif
 	internal class TypeInterceptorSelector<TInterceptor> : IInterceptorSelector where TInterceptor : IInterceptor
@@ -398,7 +402,7 @@ namespace Castle.DynamicProxy.Tests
 		#endregion
 	}
 
-#if !SILVERLIGHT
+#if FEATURE_SERIALIZATION
 	[Serializable]
 #endif
 	public class AllInterceptorSelector : IInterceptorSelector
@@ -413,7 +417,9 @@ namespace Castle.DynamicProxy.Tests
 		#endregion
 	}
 
+#if FEATURE_SERIALIZATION
 	[Serializable]
+#endif
 	public class SelectorWithState : IInterceptorSelector
 	{
 		private readonly int state;
@@ -456,7 +462,7 @@ namespace Castle.DynamicProxy.Tests
 		}
 	}
 
-#if !SILVERLIGHT
+#if FEATURE_SERIALIZATION
 	[Serializable]
 #endif
 	public class SimpleClass : ISimpleInterface
@@ -482,16 +488,22 @@ namespace Castle.DynamicProxy.Tests
 		public static ProxyGenerationOptions proxyGenerationOptions;
 		public static MethodInfo token_Do;
 
+#if FEATURE_SERIALIZATION
 		[XmlIgnore]
+#endif
 		public IInterceptor[] __interceptors;
 
 		public IInterceptorSelector __selector;
 
+#if FEATURE_SERIALIZATION
 		[XmlIgnore]
+#endif
 		public SimpleClass __target;
 
+#if FEATURE_SERIALIZATION
 		[NonSerialized]
 		[XmlIgnore]
+#endif
 		public IInterceptor[] interceptors_Do;
 
 		public virtual int Do()

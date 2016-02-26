@@ -100,10 +100,6 @@ namespace Castle.DynamicProxy
 			get { return proxyBuilder; }
 		}
 
-#if MONO
-#pragma warning disable 1584, 1580, 1574 // Mono chokes on cref with generic arguments
-#endif
-
 		/// <summary>
 		///   Creates proxy object intercepting calls to members of interface <typeparamref name = "TInterface" /> on <paramref
 		///    name = "target" /> object with given <paramref name = "interceptors" />.
@@ -169,10 +165,6 @@ namespace Castle.DynamicProxy
 		{
 			return (TInterface)CreateInterfaceProxyWithTarget(typeof(TInterface), target, options, interceptors);
 		}
-
-#if MONO
-#pragma warning restore 1584, 1580, 1574
-#endif
 
 		/// <summary>
 		///   Creates proxy object intercepting calls to members of interface <paramref name = "interfaceToProxy" /> on <paramref
@@ -326,7 +318,7 @@ namespace Castle.DynamicProxy
 				throw new ArgumentNullException("interceptors");
 			}
 
-			if (!interfaceToProxy.IsInterface)
+			if (!interfaceToProxy.GetTypeInfo().IsInterface)
 			{
 				throw new ArgumentException("Specified type is not an interface", "interfaceToProxy");
 			}
@@ -581,7 +573,7 @@ namespace Castle.DynamicProxy
 				throw new ArgumentNullException("interceptors");
 			}
 
-			if (!interfaceToProxy.IsInterface)
+			if (!interfaceToProxy.GetTypeInfo().IsInterface)
 			{
 				throw new ArgumentException("Specified type is not an interface", "interfaceToProxy");
 			}
@@ -600,7 +592,7 @@ namespace Castle.DynamicProxy
 						var iUnknown = Marshal.GetIUnknownForObject(target); // Increment the reference count
 						var interfacePointer = IntPtr.Zero;
 						var result = Marshal.QueryInterface(iUnknown, ref interfaceId, out interfacePointer); // Increment the reference count
-						var isInterfacePointerNull = interfacePointer == IntPtr.Zero;		        
+						var isInterfacePointerNull = interfacePointer == IntPtr.Zero;
 						Marshal.Release(iUnknown); // Decrement the reference count
 						Marshal.Release(interfacePointer); // Decrement the reference count
 
@@ -860,7 +852,7 @@ namespace Castle.DynamicProxy
 				throw new ArgumentNullException("interceptors");
 			}
 
-			if (!interfaceToProxy.IsInterface)
+			if (!interfaceToProxy.GetTypeInfo().IsInterface)
 			{
 				throw new ArgumentException("Specified type is not an interface", "interfaceToProxy");
 			}
@@ -1169,7 +1161,7 @@ namespace Castle.DynamicProxy
 			{
 				throw new ArgumentNullException("options");
 			}
-			if (!classToProxy.IsClass)
+			if (!classToProxy.GetTypeInfo().IsClass)
 			{
 				throw new ArgumentException("'classToProxy' must be a class", "classToProxy");
 			}
@@ -1433,7 +1425,7 @@ namespace Castle.DynamicProxy
 			{
 				throw new ArgumentNullException("options");
 			}
-			if (!classToProxy.IsClass)
+			if (!classToProxy.GetTypeInfo().IsClass)
 			{
 				throw new ArgumentException("'classToProxy' must be a class", "classToProxy");
 			}
@@ -1484,7 +1476,7 @@ namespace Castle.DynamicProxy
 
 		protected void CheckNotGenericTypeDefinition(Type type, string argumentName)
 		{
-			if (type != null && type.IsGenericTypeDefinition)
+			if (type != null && type.GetTypeInfo().IsGenericTypeDefinition)
 			{
 				throw new GeneratorException(string.Format("Can not create proxy for type {0} because it is an open generic type.",
 														   type.GetBestName()));

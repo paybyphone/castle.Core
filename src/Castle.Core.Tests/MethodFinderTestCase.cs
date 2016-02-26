@@ -16,11 +16,12 @@ namespace Castle.DynamicProxy.Tests
 {
 	using System;
 	using System.Collections;
-	using System.Reflection;
-	using Castle.DynamicProxy.Generators;
-	using NUnit.Framework;
 	using System.Collections.Generic;
+	using System.Reflection;
 
+	using Castle.DynamicProxy.Generators;
+
+	using NUnit.Framework;
 
 	[TestFixture]
 	public class MethodFinderTestCase
@@ -50,7 +51,11 @@ namespace Castle.DynamicProxy.Tests
 				AssertArraysAreEqualUnsorted(new object[] { null, "one", null }, new object[] { "one", "one", null });
 				Assert.Fail();
 			}
+#if FEATURE_XUNITNET
+			catch (Xunit.Sdk.XunitException)
+#else
 			catch (AssertionException)
+#endif
 			{
 				// ok
 			}
@@ -59,7 +64,11 @@ namespace Castle.DynamicProxy.Tests
 				AssertArraysAreEqualUnsorted(new object[] { null, "one" }, new object[] { "one", null, null });
 				Assert.Fail();
 			}
+#if FEATURE_XUNITNET
+			catch (Xunit.Sdk.XunitException)
+#else
 			catch (AssertionException)
+#endif
 			{
 				// ok
 			}
@@ -68,7 +77,11 @@ namespace Castle.DynamicProxy.Tests
 				AssertArraysAreEqualUnsorted(new object[] { null, "one", null }, new object[] { "one", null });
 				Assert.Fail();
 			}
+#if FEATURE_XUNITNET
+			catch (Xunit.Sdk.XunitException)
+#else
 			catch (AssertionException)
+#endif
 			{
 				// ok
 			}
@@ -104,20 +117,21 @@ namespace Castle.DynamicProxy.Tests
 		}
 
 		[Test]
-		[ExpectedException(typeof(ArgumentException))]
 		public void GetMethodsThrowsOnStatic()
 		{
-			MethodFinder.GetAllInstanceMethods(typeof(object),
-											   BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+			Assert.Throws<ArgumentException>(() =>
+				MethodFinder.GetAllInstanceMethods(typeof(object),
+					BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
+			);
 		}
 
 		[Test]
-		[ExpectedException(typeof(ArgumentException))]
 		public void GetMethodsThrowsOnOtherFlags()
 		{
-			MethodFinder.GetAllInstanceMethods(typeof(object),
-											   BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public |
-											   BindingFlags.DeclaredOnly);
+			Assert.Throws<ArgumentException>(() =>
+				MethodFinder.GetAllInstanceMethods(typeof(object),
+					BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.DeclaredOnly)
+			);
 		}
 	}
 }

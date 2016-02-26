@@ -18,7 +18,7 @@ namespace Castle.DynamicProxy.Generators
 	using System.Diagnostics;
 	using System.Reflection;
 	using System.Reflection.Emit;
-#if !SILVERLIGHT
+#if FEATURE_SERIALIZATION
 	using System.Xml.Serialization;
 #endif
 
@@ -52,7 +52,7 @@ namespace Castle.DynamicProxy.Generators
 				namingScope.GetUniqueName(string.Format("interceptors_{0}", method.Name)),
 				typeof(IInterceptor[]),
 				false);
-#if !SILVERLIGHT
+#if FEATURE_SERIALIZATION
 			@class.DefineCustomAttributeFor<XmlIgnoreAttribute>(methodInterceptors);
 #endif
 			return methodInterceptors;
@@ -62,7 +62,7 @@ namespace Castle.DynamicProxy.Generators
 		{
 			var invocationType = invocation;
 
-			Trace.Assert(MethodToOverride.IsGenericMethod == invocationType.IsGenericTypeDefinition);
+			Trace.Assert(MethodToOverride.IsGenericMethod == invocationType.GetTypeInfo().IsGenericTypeDefinition);
 			var genericArguments = Type.EmptyTypes;
 
 			var constructor = invocation.GetConstructors()[0];
@@ -145,7 +145,6 @@ namespace Castle.DynamicProxy.Generators
 				return null;
 			}
 
-
 			var methodInterceptorsField = BuildMethodInterceptorsField(@class, MethodToOverride, namingScope);
 
 			var emptyInterceptors = new NewArrayExpression(0, typeof(IInterceptor));
@@ -166,7 +165,7 @@ namespace Castle.DynamicProxy.Generators
 
 		private void EmitLoadGenricMethodArguments(MethodEmitter methodEmitter, MethodInfo method, Reference invocationLocal)
 		{
-			var genericParameters = method.GetGenericArguments().FindAll(t => t.IsGenericParameter);
+			var genericParameters = method.GetGenericArguments().FindAll(t => t.GetTypeInfo().IsGenericParameter);
 			var genericParamsArrayLocal = methodEmitter.CodeBuilder.DeclareLocal(typeof(Type[]));
 			methodEmitter.CodeBuilder.AddStatement(
 				new AssignStatement(genericParamsArrayLocal, new NewArrayExpression(genericParameters.Length, typeof(Type))));
@@ -209,7 +208,7 @@ namespace Castle.DynamicProxy.Generators
 		{
 			for (int i = 0; i < arguments.Length; i++ )
 			{
-				if (arguments[i].Type.IsByRef)
+				if (arguments[i].Type.GetTypeInfo().IsByRef)
 				{
 					return true;
 				}

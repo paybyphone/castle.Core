@@ -27,21 +27,32 @@ namespace Castle.Core.Logging.Tests
 	/// </summary>
 	[TestFixture]
 	public class TraceLoggerTests
+#if FEATURE_XUNITNET
+		: IDisposable
+#endif
 	{
+#if FEATURE_XUNITNET
+		public TraceLoggerTests()
+#else
 		[SetUp]
 		public void Initialize()
+#endif
 		{
 			Listener.ClearMessages();
 		}
 
+#if FEATURE_XUNITNET
+		public void Dispose()
+#else
 		[TearDown]
 		public void Cleanup()
+#endif
 		{
 			Listener.ClearMessages();
 		}
 
 		[Test]
-		[Platform(Exclude = "mono", Reason = "Won't pass because of Mono bug. Review this when new Mono is out.")]
+		[Platform(Exclude = "mono", Reason = "Mono has a bug that causes the listeners to not fully work.")]
 		public void WritingToLoggerByType()
 		{
 			TraceLoggerFactory factory = new TraceLoggerFactory();
@@ -85,7 +96,7 @@ namespace Castle.Core.Logging.Tests
 		}
 
 		[Test]
-		[Platform(Exclude = "mono", Reason = "Won't pass because of Mono bug. Review this when new Mono is out.")]
+		[Platform(Exclude = "mono", Reason = "Mono has a bug that causes the listeners to not fully work.")]
 		public void FallUpToShorterSourceName()
 		{
 			TraceLoggerFactory factory = new TraceLoggerFactory();
@@ -93,11 +104,11 @@ namespace Castle.Core.Logging.Tests
 			logger.Info("Logging to config namespace");
 
 			Listener.AssertContains("configrule", "Castle.Core.Configuration.Xml.XmlConfigurationDeserializer");
-			Listener.AssertContains("configrule", "Logging to config namespace");            
+			Listener.AssertContains("configrule", "Logging to config namespace");
 		}
 
 		[Test]
-		[Platform(Exclude = "mono", Reason = "Won't pass because of Mono bug. Review this when new Mono is out.")]
+		[Platform(Exclude = "mono", Reason = "Mono has a bug that causes the listeners to not fully work.")]
 		public void FallUpToDefaultSource()
 		{
 			TraceLoggerFactory factory = new TraceLoggerFactory();
@@ -111,7 +122,7 @@ namespace Castle.Core.Logging.Tests
 		#region in-memory listener class
 
 		/// <summary>
-		/// This class captures trace text and records it to StringBuilders in a static dictionary.   
+		/// This class captures trace text and records it to StringBuilders in a static dictionary.
 		/// Used for the sake of unit testing.
 		/// </summary>
 		public class Listener : TraceListener

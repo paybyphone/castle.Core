@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if !SILVERLIGHT && !MONO // Until support for other platforms is verified
+#if !SILVERLIGHT // Until support for other platforms is verified
 namespace Castle.Components.DictionaryAdapter.Xml.Tests
 {
 #if !SILVERLIGHT
@@ -31,8 +31,12 @@ namespace Castle.Components.DictionaryAdapter.Xml.Tests
 	{
 		private DictionaryAdapterFactory factory;
 
+#if FEATURE_XUNITNET
+		public XmlAdapterAcceptanceTestCase()
+#else
 		[SetUp]
 		public void SetUp()
+#endif
 		{
 			factory = new DictionaryAdapterFactory();
 		}
@@ -77,6 +81,9 @@ namespace Castle.Components.DictionaryAdapter.Xml.Tests
 		}
 
 		[Test]
+#if __MonoCS__
+		[Ignore("System.NullReferenceException : Object reference not set to an instance of an object")]
+#endif
 		public void Adapter_OnXml_CanTargetWithXPath()
 		{
 			var line1 = "2922 South Highway 205";
@@ -239,6 +246,9 @@ namespace Castle.Components.DictionaryAdapter.Xml.Tests
 		}
 
 		[Test]
+#if __MonoCS__
+		[Ignore("System.NullReferenceException : Object reference not set to an instance of an object")]
+#endif
 		public void Adapter_OnXml_CanWriteProperties()
 		{
 			var name = "Soccer Adult Winter II 2010";
@@ -321,6 +331,9 @@ namespace Castle.Components.DictionaryAdapter.Xml.Tests
 		}
 
 		[Test]
+#if __MonoCS__
+		[Ignore("System.NullReferenceException : Object reference not set to an instance of an object")]
+#endif
 		public void Adapter_OnXml_CanCopySubTree()
 		{
 			var xml = string.Format(
@@ -416,6 +429,9 @@ namespace Castle.Components.DictionaryAdapter.Xml.Tests
 		}
 
 		[Test]
+#if __MonoCS__
+		[Ignore("System.NullReferenceException : Object reference not set to an instance of an object")]
+#endif
 		public void Adapter_OnXml_CanCreate_Other_Adapter()
 		{
 			var xml = @"<Season xmlns='RISE' xmlns:rise='RISE'>
@@ -818,6 +834,9 @@ namespace Castle.Components.DictionaryAdapter.Xml.Tests
 		}
 
 		[Test]
+#if __MonoCS__
+		[Ignore("System.NullReferenceException : Object reference not set to an instance of an object")]
+#endif
 		public void Can_Reassign_Lists()
 		{
 			var xml = @"<Season xmlns='RISE' xmlns:rise='RISE'>

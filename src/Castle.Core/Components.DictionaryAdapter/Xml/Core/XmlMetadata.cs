@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if !SILVERLIGHT && !MONO // Until support for other platforms is verified
+#if !SILVERLIGHT // Until support for other platforms is verified
 namespace Castle.Components.DictionaryAdapter.Xml
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Reflection;
 	using System.Xml;
 	using System.Xml.Serialization;
 
@@ -38,9 +39,7 @@ namespace Castle.Components.DictionaryAdapter.Xml
 		private readonly XmlIncludedTypeSet    includedTypes;
 		private readonly XmlContext            context;
 		private readonly DictionaryAdapterMeta source;
-#if !SL3
 		private readonly CompiledXPath path;
-#endif
 		
 		public XmlMetadata(DictionaryAdapterMeta meta, IEnumerable<string> reservedNamespaceUris)
 		{
@@ -64,11 +63,10 @@ namespace Castle.Components.DictionaryAdapter.Xml
 			var xmlInclude    = null as XmlIncludeAttribute;
 			var xmlNamespace  = null as XmlNamespaceAttribute;
 			var reference     = null as ReferenceAttribute;
-#if !SL3
 			var xPath         = null as XPathAttribute;
 			var xPathVariable = null as XPathVariableAttribute;
 			var xPathFunction = null as XPathFunctionAttribute;
-#endif
+
 			foreach (var behavior in meta.Behaviors)
 			{
 				if      (TryCast(behavior, ref xmlRoot      )) { }
@@ -77,11 +75,9 @@ namespace Castle.Components.DictionaryAdapter.Xml
 				else if (TryCast(behavior, ref xmlInclude   )) { AddPendingInclude(xmlInclude); }
 				else if (TryCast(behavior, ref xmlNamespace )) { context.AddNamespace(xmlNamespace ); }
 				else if (TryCast(behavior, ref reference    )) { }
-#if !SL3
 				else if (TryCast(behavior, ref xPath        )) { }
 				else if (TryCast(behavior, ref xPathVariable)) { context.AddVariable (xPathVariable); }
 				else if (TryCast(behavior, ref xPathFunction)) { context.AddFunction (xPathFunction); }
-#endif
 			}
 
 			if (xmlDefaults != null)
@@ -124,13 +120,11 @@ namespace Castle.Components.DictionaryAdapter.Xml
 				rootNamespaceUri
 			);
 
-#if !SL3
 			if (xPath != null)
 			{
 				path = xPath.GetPath;
 				path.SetContext(context);
 			}
-#endif
 		}
 
 		public Type ClrType
@@ -187,12 +181,12 @@ namespace Castle.Components.DictionaryAdapter.Xml
 		{
 			get { return context; }
 		}
-#if !SL3
+
 		public CompiledXPath Path
 		{
 			get { return path; }
 		}
-#endif
+
 		IXmlKnownType IXmlKnownTypeMap.Default
 		{
 			get { return this; }
@@ -210,10 +204,9 @@ namespace Castle.Components.DictionaryAdapter.Xml
 
 		public IXmlCursor SelectBase(IXmlNode node) // node is root
 		{
-#if !SL3
 			if (path != null)
 				return node.Select(path, this, context, RootFlags);
-#endif
+
 			return node.SelectChildren(this, context, RootFlags);
 		}
 
@@ -292,7 +285,7 @@ namespace Castle.Components.DictionaryAdapter.Xml
 			switch (kind)
 			{
 				case XmlTypeKind.Complex:
-					if (!clrType.IsInterface) goto default;
+					if (!clrType.GetTypeInfo().IsInterface) goto default;
 					return GetXmlMetadata(clrType).XsiType;
 
 				case XmlTypeKind.Collection:
@@ -346,7 +339,7 @@ namespace Castle.Components.DictionaryAdapter.Xml
 		{
 			var kind = XmlTypeSerializer.For(clrType).Kind;
 
-			return kind == XmlTypeKind.Complex && clrType.IsInterface
+			return kind == XmlTypeKind.Complex && clrType.GetTypeInfo().IsInterface
 				? Try.Success(out metadata, GetXmlMetadata(clrType))
 				: Try.Failure(out metadata);
 		}

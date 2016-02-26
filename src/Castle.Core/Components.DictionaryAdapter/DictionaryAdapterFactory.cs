@@ -30,7 +30,7 @@ namespace Castle.Components.DictionaryAdapter
 #endif
 	using System.Diagnostics;
 
-#if !SILVERLIGHT && !MONO // Until support for other platforms is verified
+#if !SILVERLIGHT // Until support for other platforms is verified
 	using Castle.Components.DictionaryAdapter.Xml;
 #endif
 	using Castle.Core.Internal;
@@ -91,7 +91,7 @@ namespace Castle.Components.DictionaryAdapter
 			return GetAdapter(type, new NameValueCollectionAdapter(nameValues));
 		}
 
-#if !SILVERLIGHT && !MONO // Until support for other platforms is verified
+#if !SILVERLIGHT // Until support for other platforms is verified
 		/// <inheritdoc />
 		public T GetAdapter<T>(System.Xml.XmlNode xmlNode)
 		{
@@ -134,8 +134,9 @@ namespace Castle.Components.DictionaryAdapter
 		{
 			if (type == null)
 				throw new ArgumentNullException("type");
-			if (type.IsInterface == false)
+			if (type.GetTypeInfo().IsInterface == false)
 				throw new ArgumentException("Only interfaces can be adapted to a dictionary", "type");
+
 			DictionaryAdapterMeta meta;
 
 			using (interfaceToMetaLock.ForReading())
@@ -402,7 +403,7 @@ namespace Castle.Components.DictionaryAdapter
 			PreparePropertyMethod(descriptor, setILGenerator);
 
 			setILGenerator.Emit(OpCodes.Ldarg_1);
-			if (descriptor.PropertyType.IsValueType)
+			if (descriptor.PropertyType.GetTypeInfo().IsValueType)
 			{
 				setILGenerator.Emit(OpCodes.Box, descriptor.PropertyType);
 			}

@@ -12,21 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if !SILVERLIGHT
+
 namespace Castle.Core.Internal
 {
 	using System;
 	using System.Security;
 	using System.Security.Permissions;
-	
-#if !SILVERLIGHT
+
 	public static class PermissionUtil
 	{
-#if DOTNET
+#if DOTNET40
 		[SecuritySafeCritical]
 #endif
 		public static bool IsGranted(this IPermission permission)
 		{
-#if DOTNET35 || MONO26
+#if DOTNET35
 			return SecurityManager.IsGranted(permission);
 #else
 			var permissionSet = new PermissionSet(PermissionState.None);
@@ -36,5 +37,6 @@ namespace Castle.Core.Internal
 #endif
 		}
 	}
-#endif
 }
+
+#endif

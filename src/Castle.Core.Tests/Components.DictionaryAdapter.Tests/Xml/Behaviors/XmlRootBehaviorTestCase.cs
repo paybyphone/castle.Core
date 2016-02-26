@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if !SILVERLIGHT && !MONO // Until support for other platforms is verified
+#if !SILVERLIGHT // Until support for other platforms is verified
 namespace Castle.Components.DictionaryAdapter.Xml.Tests
 {
-	using System;
 	using System.Xml.Serialization;
 	using Castle.Components.DictionaryAdapter.Tests;
     using NUnit.Framework;
@@ -36,9 +35,7 @@ namespace Castle.Components.DictionaryAdapter.Xml.Tests
 
 			foo.A = "a";
 
-			Assert.That(
-				XmlAdapter.For(foo).Node.Xml,
-				XmlEquivalent.To("<XX xmlns='urn:a'> <A>a</A> </XX>"));
+			CustomAssert.AreXmlEquivalent("<XX xmlns='urn:a'> <A>a</A> </XX>", XmlAdapter.For(foo).Node.Xml);
 		}
 	}
 }

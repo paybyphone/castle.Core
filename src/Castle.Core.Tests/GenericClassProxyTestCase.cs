@@ -114,14 +114,15 @@ namespace Castle.DynamicProxy.Tests
 		}
 
 		[Test]
+#if __MonoCS__
+		[Ignore("System.InvalidCastException : Cannot cast from source type to destination type.")]
+#endif
 		public void ProxyWithMethodReturningGenericOfGenericOfT()
 		{
 			var proxy = generator.CreateClassProxy<ClassWithMethodWithReturnArrayOfListOfT>();
 			proxy.GenericMethodReturnsListArray<string>();
 			proxy.GenericMethodReturnsGenericOfGenericType<int>();
 		}
-
-#if !MONO
 
 		[Test]
 		public void ProxyWithGenericArgumentsAndMethodGenericArguments()
@@ -317,13 +318,13 @@ namespace Castle.DynamicProxy.Tests
 		}
 
 		[Test]
-		[ExpectedException(typeof (GeneratorException))]
 		public void ThrowsWhenProxyingGenericTypeDefNoTarget()
 		{
 			KeepDataInterceptor interceptor = new KeepDataInterceptor();
-			object o = generator.CreateClassProxy(typeof (GenClassWithGenReturn<,>), interceptor);
-		}
 
-#endif
+			Assert.Throws<GeneratorException>(delegate {
+				object o = generator.CreateClassProxy(typeof(GenClassWithGenReturn<,>), interceptor);
+			});
+		}
 	}
 }

@@ -22,15 +22,18 @@ namespace Castle.Core.Tests.Resources
 
 	using Castle.Core.Resource;
 
-
 	[TestFixture]
 	public class FileResourceFactoryTestCase
 	{
-		private FileResourceFactory resFactory = new FileResourceFactory();
-		private String basePath;
+		private readonly FileResourceFactory resFactory = new FileResourceFactory();
+		private string basePath;
 
-		[TestFixtureSetUp]
+#if FEATURE_XUNITNET
+		public FileResourceFactoryTestCase()
+#else
+		[SetUp]
 		public void Init()
+#endif
 		{
 			var currentDirectory = Directory.GetCurrentDirectory();
 			basePath = Path.Combine(currentDirectory, "Core.Tests" + Path.DirectorySeparatorChar + "Resources");
@@ -82,11 +85,11 @@ namespace Castle.Core.Tests.Resources
 		}
 
 		[Test]
-		[ExpectedException(typeof(ResourceException))]
 		public void NonExistingResource()
 		{
-			resFactory.Create( new CustomUri(basePath + "/Something/file1.txt") )
-				.GetStreamReader();
+			IResource resource = resFactory.Create(new CustomUri(basePath + "/Something/file1.txt"));
+
+			Assert.Throws<ResourceException>(() => resource.GetStreamReader());
 		}
 	}
 }

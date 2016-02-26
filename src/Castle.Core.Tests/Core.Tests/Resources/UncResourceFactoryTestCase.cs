@@ -20,14 +20,17 @@ namespace Castle.Core.Tests.Resources
 
 	using Castle.Core.Resource;
 
-
 	[TestFixture]
 	public class UncResourceFactoryTestCase
 	{
 		private UncResourceFactory resFactory;
 
+#if FEATURE_XUNITNET
+		public UncResourceFactoryTestCase()
+#else
 		[SetUp]
 		public void SetUp()
+#endif
 		{
 			resFactory = new UncResourceFactory();
 		}
@@ -38,6 +41,7 @@ namespace Castle.Core.Tests.Resources
 			Assert.IsTrue( resFactory.Accept( new CustomUri(@"\\server\something") ) );
 			Assert.IsFalse( resFactory.Accept( new CustomUri("http://www.castleproject.org") ) );
 		}
+
 #if !SILVERLIGHT // Silverlight test runner does not handle explicit tests
 		[Test, Explicit]
 		public void CreateWithAbsolutePath()
@@ -66,11 +70,11 @@ namespace Castle.Core.Tests.Resources
 		}
 
 		[Test, Explicit]
-		[ExpectedException(typeof(ResourceException))]
 		public void NonExistingResource()
 		{
-			resFactory.Create( new CustomUri(@"\\hammettz\C$\file1.txt") )
-				.GetStreamReader();
+			IResource resource = resFactory.Create(new CustomUri(@"\\hammettz\C$\file1.txt"));
+
+			Assert.Throws<ResourceException>(() => resource.GetStreamReader());
 		}
 #endif
 	}

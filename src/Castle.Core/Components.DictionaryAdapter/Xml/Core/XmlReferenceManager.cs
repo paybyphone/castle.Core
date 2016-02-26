@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if !SILVERLIGHT && !MONO // Until support for other platforms is verified
+#if !SILVERLIGHT // Until support for other platforms is verified
 namespace Castle.Components.DictionaryAdapter.Xml
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Reflection;
+
 	using Castle.Core;
 	using Castle.Core.Internal;
 
@@ -420,7 +422,7 @@ namespace Castle.Components.DictionaryAdapter.Xml
 
 		private static bool ShouldExclude(Type type)
 		{
-			return type.IsValueType
+			return type.GetTypeInfo().IsValueType
 				|| type == StringType;
 		}
 
