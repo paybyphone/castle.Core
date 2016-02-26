@@ -45,7 +45,7 @@ limitations under the License.
 		<AssemblyVersion_Build>0</AssemblyVersion_Build> <!-- By default it's (and should be) equal to $(Project_Build) -->
 
 		<!-- Project folders -->
-		<BuildScriptsPath Condition="'$(BuildScriptsPath)' ==''">$(RootPath)\buildscripts</BuildScriptsPath>
+		<BuildScriptsPath Condition="'$(BuildScriptsPath)' ==''">$(RootPath)/buildscripts</BuildScriptsPath>
 
 	</PropertyGroup>	
 
@@ -78,7 +78,7 @@ limitations under the License.
 	<!-- Import project specific settings for given Visual Studio project -->
 	<Import
 		Project="$(MSBuildProjectDirectory)\Settings.proj"
-		Condition="'$(TargetFrameworkVersion)' != '' and Exists('$(MSBuildProjectDirectory)\Settings.proj')"
+		Condition="'$(TargetFrameworkVersion)' != '' and Exists('$(MSBuildProjectDirectory)/Settings.proj')"
 		/>
 
 
